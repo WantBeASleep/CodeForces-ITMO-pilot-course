@@ -1,3 +1,5 @@
 .vscode
+.gitignore
 a.cpp
+a.out
 b.cpp

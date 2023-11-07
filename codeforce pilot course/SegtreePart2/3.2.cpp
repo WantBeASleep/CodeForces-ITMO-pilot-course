@@ -56,8 +56,8 @@ class Segtree{
             get<0>(a[2 * x + 2]) = op_modify(get<0>(a[2 * x + 2]), half);
             
             get<1>(a[x]) = false;
-            get<1>(a[2 * x + 1]) = true;
-            get<1>(a[2 * x + 2]) = true;
+            get<1>(a[2 * x + 1]) = !(get<1>(a[2 * x + 1]));
+            get<1>(a[2 * x + 2]) = !(get<1>(a[2 * x + 2]));
         }
 
         void modify(int l, int r, int x, int lx, int rx) {
@@ -78,8 +78,8 @@ class Segtree{
         }
 
         int calc(int k, int x, int lx, int rx) {
-            propagation(x, lx, rx);
             if (rx == lx + 1) return lx;
+            propagation(x, lx, rx);
             int m = (lx + rx) / 2;
             if (get<0>(a[2 * x + 1]).count >= k) {
                 return calc(k, 2 * x + 1, lx, m);

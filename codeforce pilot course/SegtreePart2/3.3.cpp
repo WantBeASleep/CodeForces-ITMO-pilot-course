@@ -3,9 +3,11 @@
 #include <vector>
 #include <algorithm>
 
-typedef long long ll;
-
 using namespace std;
+
+
+typedef long long ll;
+typedef tuple<ll, ll, bool> t;
 
 class Segtree{
     public:
@@ -17,25 +19,18 @@ class Segtree{
             modify(l, r, v, 0, 0, size);
         }
 
-        int calc(int v, int l) {
+        int calc(ll v, int l) {
             return calc(l, v, 0, 0, size);
         }
 
     private:
-
-        struct elem {
-            ll max;
-        };
-
-        typedef tuple<elem, ll, bool> t;
-
         vector<t> a;
         int size;
 
         void init(int n) {
             size = 1;
             while (size < n) size *= 2;
-            a.assign(2 * size - 1, t({0}, 0, false));
+            a.assign(2 * size - 1, t(0, 0, false));
         }
 
         ll op_modify(ll a, ll v) {
@@ -53,10 +48,11 @@ class Segtree{
             get<1>(a[2 * x + 1]) = op_modify(get<1>(a[2 * x + 1]), get<1>(a[x]));
             get<1>(a[2 * x + 2]) = op_modify(get<1>(a[2 * x + 2]), get<1>(a[x]));
 
-            get<0>(a[2 * x + 1]).max = op_modify(get<0>(a[2 * x + 1]).max, get<1>(a[x]));
-            get<0>(a[2 * x + 2]).max = op_modify(get<0>(a[2 * x + 2]).max, get<1>(a[x]));
+            get<0>(a[2 * x + 1]) = op_modify(get<0>(a[2 * x + 1]), get<1>(a[x]));
+            get<0>(a[2 * x + 2]) = op_modify(get<0>(a[2 * x + 2]), get<1>(a[x]));
 
             get<2>(a[x]) = false;
+            get<1>(a[x]) = 0;
             get<2>(a[2 * x + 1]) = true;
             get<2>(a[2 * x + 2]) = true;
         }
@@ -65,7 +61,7 @@ class Segtree{
             propagate(x, lx, rx);
             if (rx <= l or lx >= r) return;
             if (lx >= l and rx <= r) {
-                get<0>(a[x]).max = op_modify(get<0>(a[x]).max, v);
+                get<0>(a[x]) = op_modify(get<0>(a[x]), v);
                 get<1>(a[x]) = op_modify(get<1>(a[x]), v);
                 get<2>(a[x]) = true;
                 return;
@@ -75,17 +71,15 @@ class Segtree{
             modify(l, r, v, 2 * x + 1, lx, m);
             modify(l, r, v, 2 * x + 2, m, rx);
 
-            get<0>(a[x]).max = op_calc(get<0>(a[2 * x + 1]).max, get<0>(a[2 * x + 2]).max);
-            if (get<2>(a[x]) == true) get<0>(a[x]).max = op_modify(get<0>(a[x]).max, get<1>(a[x]));
+            get<0>(a[x]) = op_calc(get<0>(a[2 * x + 1]), get<0>(a[2 * x + 2]));
         }
 
         int calc(int l, ll v, int x, int lx, int rx) {
             propagate(x, lx, rx);
-            if (get<0>(a[x]).max < v) return -1;
-            if (rx <= l) return -1;
+            if (get<0>(a[x]) < v or (rx <= l)) return -1;
             if (rx == lx + 1) return lx;
 
-            int m = (lx + rx) / 2;
+            int m = (lx + rx) / 2;  
             int res = calc(l, v, 2 * x + 1, lx, m);
             if (res == -1) return calc(l, v, 2 * x + 2, m, rx);
             return res;
@@ -109,7 +103,7 @@ int main()
         } else {
             int x, l;
             cin >> x >> l;
-            cout << sg.calc(x, l) << endl;
+            cout << sg.calc(x, l) << "\n";
         }
     }
 }

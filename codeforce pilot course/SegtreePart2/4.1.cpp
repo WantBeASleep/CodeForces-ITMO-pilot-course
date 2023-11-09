@@ -1,14 +1,9 @@
-// тут можно написать обертку оберток для op_mod и op_calc, но ввиду того что проще сделать все присвоением, я не вижу смысла страдать ради этого, все проще
 #include <iostream>
-#include <tuple>
 #include <vector>
-#include <algorithm>
 
 using namespace std;
 
-
 typedef long long ll;
-typedef tuple<ll, ll, bool, int> t;
 
 class Segtree{
     public:
@@ -25,20 +20,28 @@ class Segtree{
         }
 
     private:
-        vector<t> a;
+
+        struct node {
+            ll val;
+            ll f;
+            bool op;
+            int type;
+        };
+
+        vector<node> a;
         int size;
 
         void init(int n) {
             size = 1;
             while (size < n) size *= 2;
-            a.assign(2 * size - 1, t(0, 0, false, 0));
+            a.assign(2 * size - 1, {0, 0, false, 0});
         }
 
-        ll op_modify_one(ll v) {
+        ll op_mod1(ll v) {
             return v;
         }
 
-        ll op_modify_two(ll a, ll v) {
+        ll op_mod2(ll a, ll v) {
             return a + v;
         }
 
@@ -47,51 +50,64 @@ class Segtree{
         }
 
         void propagate(int x, int lx, int rx) {
-           if (get<2>(a[x]) == false or (rx == lx + 1)) return;
+            if (!a[x].op or (rx == lx + 1)) return;
 
-           int half = (rx - lx) / 2;
+            int half = (rx - lx) / 2;
 
             // присваивание
-           if (get<3>(a[x]) == 1) {
-                get<1>(a[2 * x + 1]) = op_modify_one(get<1>(a[x]));
-                get<1>(a[2 * x + 2]) = op_modify_one(get<1>(a[x]));
+            if (a[x].type == 1) {
+                a[2 * x + 1].f = op_mod1(a[x].f);
+                a[2 * x + 2].f = op_mod1(a[x].f);
 
-                get<0>(a[2 * x + 1]) = op_modify_one(get<1>(a[x]) * half);
-                get<0>(a[2 * x + 2]) = op_modify_one(get<1>(a[x]) * half);
+                a[2 * x + 1].val = op_mod1(a[x].f * half);
+                a[2 * x + 2].val = op_mod1(a[x].f * half);
 
-                get<1>(a[x]) = 0;
-                get<2>(a[x]) = false;
-                get<3>(a[x]) = 0;
+                a[x].f = 0;
+                a[x].op = false;
+                a[x].type = 0;
+
+                a[2 * x + 1].op = true;
+                a[2 * x + 2].op = true;
                 
-                get<2>(a[2 * x + 1]) = true;
-                get<2>(a[2 * x + 2]) = true;
+                a[2 * x + 1].type = 1;
+                a[2 * x + 2].type = 1;
 
-                get<3>(a[2 * x + 1]) = 1;
-                get<3>(a[2 * x + 2]) = 1;
-            } else {
-                // прибавление
-                if (get<2>(a[2 * x + 1]) and get<3>(a[2 * x + 1]) == 2)
-                    get<1>(a[2 * x + 1]) = op_modify_two(get<1>(a[2 * x + 1]), get<1>(a[x]));
-                else 
-                    get<1>(a[2 * x + 1]) = op_modify_one(get<1>(a[x]));
-
-                if (get<2>(a[2 * x + 2]) and get<3>(a[2 * x + 2]) == 2)
-                    get<1>(a[2 * x + 2]) = op_modify_two(get<1>(a[2 * x + 2]), get<1>(a[x]));
-                else 
-                    get<1>(a[2 * x + 2]) = op_modify_one(get<1>(a[x]));
-
-                get<0>(a[2 * x + 1]) = op_modify_two(get<0>(a[2 * x + 1]), get<1>(a[x]) * half);
-                get<0>(a[2 * x + 2]) = op_modify_two(get<0>(a[2 * x + 2]), get<1>(a[x]) * half);
+            } else if (a[x].type == 2) {
                 
-                get<1>(a[x]) = 0;
-                get<2>(a[x]) = false;
-                get<3>(a[x]) = 0;
+                if (a[2 * x + 1].op and a[2 * x + 1].type == 1) {
+                    a[2 * x + 1].f = op_mod2(a[2 * x + 1].f, a[x].f);
+                    a[2 * x + 1].type = 1;
+                }
+                else if (a[2 * x + 1].op and a[2 * x + 1].type == 2) {
+                    a[2 * x + 1].f = op_mod2(a[2 * x + 1].f, a[x].f);
+                    a[2 * x + 1].type = 2;
+                } else {
+                    a[2 * x + 1].f = op_mod1(a[x].f);
+                    a[2 * x + 1].type = 2;  
+                }
 
-                get<2>(a[2 * x + 1]) = true;
-                get<2>(a[2 * x + 2]) = true;
+                if (a[2 * x + 2].op and a[2 * x + 2].type == 1) {
+                    a[2 * x + 2].f = op_mod2(a[2 * x + 2].f, a[x].f);
+                    a[2 * x + 2].type = 1;
+                }
+                else if (a[2 * x + 2].op and a[2 * x + 2].type == 2) {
+                    a[2 * x + 2].f = op_mod2(a[2 * x + 2].f, a[x].f);
+                    a[2 * x + 2].type = 2;
+                } else {
+                    a[2 * x + 2].f = op_mod1(a[x].f);
+                    a[2 * x + 2].type = 2;  
+                }   
+                    
+                
+                a[2 * x + 1].val = op_mod2(a[2 * x + 1].val, a[x].f * half);
+                a[2 * x + 2].val = op_mod2(a[2 * x + 2].val, a[x].f * half);
 
-                get<3>(a[2 * x + 1]) = 2;
-                get<3>(a[2 * x + 2]) = 2;
+                a[x].f = 0;
+                a[x].op = false;
+                a[x].type = 0;
+
+                a[2 * x + 1].op = true;
+                a[2 * x + 2].op = true;
             }
         }
 
@@ -100,19 +116,24 @@ class Segtree{
             if (rx <= l or lx >= r) return;
             if (lx >= l and rx <= r) {
                 if (type == 1) {
-                    get<0>(a[x]) = op_modify_one(v * (rx - lx));
-                    get<1>(a[x]) = op_modify_one(v);
-                    get<2>(a[x]) = true;
-                    get<3>(a[x]) = 1;
+                    a[x].val = op_mod1(v * (rx - lx));
+                    a[x].f = v;
+                    a[x].op = true;
+                    a[x].type = 1;
                 } else {
-                    get<0>(a[x]) = op_modify_two(get<0>(a[x]), v * (rx - lx));
-                    if (get<2>(a[x]) and get<3>(a[x]) == 2) 
-                        get<1>(a[x]) = op_modify_two(get<1>(a[x]), v);
-                    else {
-                        get<1>(a[x]) = op_modify_one(v);
+                    a[x].val = op_mod2(a[x].val, v * (rx - lx));
+                    if (a[x].op and a[x].type == 1) {
+                        a[x].f = op_mod2(a[x].f, v);
+                        a[x].type = 1;
+                    } else if (a[x].op and a[x].type == 2) {
+                        a[x].f = op_mod2(a[x].f, v);
+                        a[x].type = 2;
+                    } else {
+                        a[x].f = op_mod1(v);
+                        a[x].type = 2;
                     }
-                    get<2>(a[x]) = true;
-                    get<3>(a[x]) = 2;
+
+                    a[x].op = true;
                 }
                 return;
             }
@@ -121,33 +142,28 @@ class Segtree{
             modify(l, r, v, 2 * x + 1, lx, m, type);
             modify(l, r, v, 2 * x + 2, m, rx, type);
 
-            get<0>(a[x]) = op_calc(get<0>(a[2 * x + 1]), get<0>(a[2 * x + 2]));
+            a[x].val = op_calc(a[2 * x + 1].val, a[2 * x + 2].val);
         }
 
         ll calc(int l, int r, int x, int lx, int rx) {
-            propagate(x, lx, rx);
             if (rx <= l or lx >= r) return 0;
-            if (lx >= l and rx <= r) return get<0>(a[x]);
+            if (lx >= l and rx <= r) return a[x].val;
 
             int m = (lx + rx) / 2;  
             
             ll left = calc(l, r, 2 * x + 1, lx, m);
             ll right = calc(l, r, 2 * x + 2, m, rx);
 
-            if (!get<2>(a[x])) return op_calc(left, right);
-            else {
-                if (get<3>(a[x]) == 1) 
-                    return op_modify_one(get<1>(a[x]) * (min(r, rx) - max(l, lx)));
-                else 
-                    return op_modify_two(op_calc(left, right), get<1>(a[x]) * (min(r, rx) - max(l, lx)));
-            }
+            if (!a[x].op) return op_calc(left, right);
+            else if (a[x].type == 1) return op_mod1(a[x].f * (min(r, rx) - max(l, lx)));
+            else return op_mod2(op_calc(left, right), a[x].f * (min(r, rx) - max(l, lx)));
         }
-
 };
 
 int main()
 {
     ios::sync_with_stdio(NULL), cin.tie(0), cout.tie(0);
+
     int n, m;
     cin >> n >> m;
     Segtree sg(n);

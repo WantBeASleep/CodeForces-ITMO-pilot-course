@@ -25,7 +25,7 @@ ll getmax() {
 
 int main()
 {
-    ios::sync_with_stdio(NULL), cin.tie(0), cout.tie(0);
+    // ios::sync_with_stdio(NULL), cin.tie(0), cout.tie(0);
     cout << getmax() << endl;
     return 0;
 }

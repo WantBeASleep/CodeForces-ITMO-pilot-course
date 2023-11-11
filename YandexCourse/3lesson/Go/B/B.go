@@ -9,7 +9,9 @@ import (
 )
 
 func main() {
-	line, _ := bufio.NewReaderSize(os.Stdin, 10000000).ReadString('\n')
+	// line, _ := bufio.NewReaderSize(os.Stdin, 1000000).ReadString('\n')
+	reader := bufio.NewReaderSize(os.Stdin, 1000000)
+	line, _ := reader.ReadString('\n')
 	list := strings.Split(line[:len(line) - 1], " ")
 
 	m := make(map[int]int)

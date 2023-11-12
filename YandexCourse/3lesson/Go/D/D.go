@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"os"
-	"strings"
-	"strconv"
 	"fmt"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 func main() {
@@ -22,12 +23,16 @@ func main() {
 
 	for {
 		line, _ := reader.ReadString('\n')
+		line = line[:len(line) - 1]
+		
 		if line == "HELP" {
 			break;
 		}
-		status, _ := reader.ReadString('\n')
 
-		strlist := strings.Split(line[:len(line) - 1], " ")
+		status, _ := reader.ReadString('\n')
+		status = status[:len(status) - 1]
+
+		strlist := strings.Split(line, " ")
 		
 		if status == "YES" {
 			newmap := make(map[int]int)
@@ -51,9 +56,17 @@ func main() {
 		}
 	}
 
-
+	var anslist []int
 	for num := range ans {
-		
+		anslist = append(anslist, num)
 	}
+
+	sort.Ints(anslist)
+
+	for _, num := range anslist {
+		fmt.Print(num, " ")
+	}
+
+	fmt.Println()
 }
 

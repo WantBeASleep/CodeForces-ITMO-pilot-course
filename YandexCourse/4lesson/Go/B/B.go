@@ -15,6 +15,9 @@ func main() {
 	m := make(map[string]int)
 	
 	for reader.Scan() {
+		if (reader.Text() == "") {
+			break
+		}
 		list := strings.Split(reader.Text(), " ")
 		num, _ := strconv.Atoi(list[1])
 		m[list[0]] += num

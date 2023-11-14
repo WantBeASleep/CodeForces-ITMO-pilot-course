@@ -7,10 +7,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"math"
 )
 
 type mod struct {
-	m int
+	frac float64
 	name string
 }
 
@@ -37,7 +38,7 @@ func main() {
 		total += votes
 	}
 
-	firstConst := total / 450
+	firstConst := float64(total) / 450
 
 	ans := make(map[string]int)
 	modlist := make([]mod, len(order))
@@ -45,23 +46,22 @@ func main() {
 	var firstDistrub int
 	var i int
 	for _, s := range order {
-		if firstConst != 0 {
-			ans[s] = condition[s] / firstConst	
-		} else {
-			ans[s] = 0
-		}
+		stats := float64(condition[s]) / firstConst
+		whol, frac := math.Modf(stats)
+
+		ans[s] = int(whol)
 		firstDistrub += ans[s]
 
-		modlist[i] = mod{condition[s] % firstConst, s}
+		modlist[i] = mod{frac, s}
 		i++
 	}
 
 	if (firstDistrub != 450) {
 		sort.Slice(modlist, func(i, j int) bool {
-			if modlist[i].m == modlist[j].m {
+			if math.Abs(modlist[i].frac - modlist[j].frac) < 0.00001 {
 				return condition[modlist[i].name] > condition[modlist[j].name]
 			} else {
-				return modlist[i].m > modlist[j].m
+				return modlist[i].frac > modlist[j].frac
 			}
 		})
 
@@ -71,7 +71,6 @@ func main() {
 			ans[modlist[i].name]++
 			firstDistrub++
 			i++
-
 		}
 	}
 

@@ -14,20 +14,19 @@ func main() {
 	fmt.Scan(&n)
 
 	m := make(map[int64]int64)
+	var l []int64
 
 	for i := 0; i != n; i++ {
 		var col, num int64
 		fmt.Scan(&col, &num)
 
+		_, flag := m[col]
+		if !flag {
+			l = append(l, col)
+		}
 		m[col] += num
 	}
 
-	l := make([]int64, len(m))
-	var i int
-	for k := range m {
-		l[i] = k
-		i++
-	}
 	sort.Slice(l, func (i, j int) bool {return l[i] < l[j]})
 
 	for i := 0; i < len(l); i++ {

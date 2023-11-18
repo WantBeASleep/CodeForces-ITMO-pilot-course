@@ -7,13 +7,17 @@ import (
 )
 
 func main() {
+	cin := bufio.NewReader(os.Stdin)
+	cout := bufio.NewWriter(os.Stdout)
+	
 	var n, q int
-	// reader := bufio.NewReader(os.Stdin)
 
+	fmt.Fscan(cin, &n, &q)
 
 	data := make([]int64, n)
+
 	for i := 0; i != n; i++ {
-		fmt.Scan(&data[i])
+		fmt.Fscan(cin, &data[i])
 	}
 
 	suff := make([]int64, n + 1)
@@ -23,9 +27,10 @@ func main() {
 
 	for i := 0; i != q; i++ {
 		var l, r int
-		fmt.Scan(&l, &r)
+		fmt.Fscan(cin, &l, &r)
 		l--
-		fmt.Println(suff[r] - suff[l])
+		fmt.Fprintln(cout, suff[r] - suff[l])
 	}
 
+	cout.Flush()
 }

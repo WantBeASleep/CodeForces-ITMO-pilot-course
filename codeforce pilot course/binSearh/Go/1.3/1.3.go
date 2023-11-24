@@ -34,12 +34,12 @@ func binSearh(arr []int, x int) int {
 
 	for r != l + 1 {
 		m := (l + r) / 2
-		if arr[m] > x {
+		if arr[m] >= x {
 			r = m
 		} else {
 			l = m
 		}
 	}
 
-	return l + 1
+	return r + 1
 }
